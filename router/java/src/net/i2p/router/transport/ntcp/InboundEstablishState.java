@@ -39,6 +39,8 @@ import net.i2p.util.ByteCache;
 import net.i2p.util.Log;
 import net.i2p.util.SimpleByteCache;
 
+import net.i2p.router.transport.ntcp.Appendtofile;
+
 /**
  *
  *  NTCP 2. We are Bob.
@@ -273,10 +275,17 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
      *  @since 0.9.36
      */
     private synchronized void receiveInboundNTCP2(ByteBuffer src) {
+        Appendtofile.write("enter receiveInboundNTCP2" + "\n");
         if (_state == State.IB_NTCP2_INIT && src.hasRemaining()) {
             // use _X for the buffer
             int toGet = Math.min(src.remaining(), MSG1_SIZE - _received);
             src.get(_X, _received, toGet);
+            Appendtofile.write("receiveInbound_X: " + String.valueOf(_X) + "\n");
+            for (byte b : _X) {
+                // 使用位运算和格式化字符串将字节以十六进制形式打印
+                Appendtofile.write(String.valueOf(b));
+            }
+            Appendtofile.write("\n");
             _received += toGet;
             if (_received < MSG1_SIZE) {
                 // Won't get here, now handled in receiveInbound()
@@ -289,6 +298,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
             // replay check using encrypted key
             if (!_transport.isHXHIValid(_X)) {
                 _context.statManager().addRateData("ntcp.replayHXxorBIH", 1);
+                Appendtofile.write("Replay msg 1, eX = " + Base64.encode(_X, 0, KEY_SIZE) + "\n");
                 fail("Replay msg 1, eX = " + Base64.encode(_X, 0, KEY_SIZE));
                 return;
             }
@@ -304,6 +314,9 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
             }
             // fast MSB check for key < 2^255
             if ((_X[KEY_SIZE - 1] & 0x80) != 0) {
+                byte b = _X[KEY_SIZE - 1];
+                Appendtofile.write(String.valueOf(b) + "\n");
+                Appendtofile.write("Bad PK msg 1" + "\n");
                 fail("Bad PK msg 1");
                 return;
             }
@@ -333,10 +346,12 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                     changeState(State.IB_NTCP2_READ_RANDOM);
                 } else {
                     // got all we need, fail now
+                    Appendtofile.write("Bad msg 1, X = " + Base64.encode(_X, 0, KEY_SIZE) + " remaining = " + src.remaining()+ "\n");
                     fail("Bad msg 1, X = " + Base64.encode(_X, 0, KEY_SIZE) + " remaining = " + src.remaining(), gse);
                 }
                 return;
             } catch (RuntimeException re) {
+                Appendtofile.write("Bad msg 1, X = " + Base64.encode(_X, 0, KEY_SIZE)+ "\n");
                 fail("Bad msg 1, X = " + Base64.encode(_X, 0, KEY_SIZE), re);
                 return;
             }
@@ -344,6 +359,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 _log.debug("After msg 1: " + _handshakeState.toString());
             int v = options[1] & 0xff;
             if (v != NTCPTransport.NTCP2_INT_VERSION) {
+                Appendtofile.write("Bad version: " + v+ "\n");
                 fail("Bad version: " + v);
                 return;
             }
@@ -357,6 +373,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                     // So next time we will not accept the con from this IP
                     _context.blocklist().add(ip);
                 }
+                Appendtofile.write("Bad network id: " + v+ "\n");
                 fail("Bad network id: " + v);
                 return;
             }
@@ -381,6 +398,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 //return;
             }
             if (_msg3p2len < MSG3P2_MIN || _msg3p2len > MSG3P2_MAX) {
+                Appendtofile.write("bad msg3p2 len: " + String.valueOf(_msg3p2len) + "\n");
                 fail("bad msg3p2 len: " + _msg3p2len);
                 return;
             }
@@ -402,11 +420,13 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
         if (_state == State.IB_NTCP2_READ_RANDOM && src.hasRemaining()) {
             // read more bytes before failing
             _received += src.remaining();
+            Appendtofile.write("_received_and_padlen1 : " + String.valueOf(_received) + String.valueOf(_padlen1) + "\n");
             if (_received < _padlen1) {
                 if (_log.shouldWarn())
                     _log.warn("Bad msg 1, got " + src.remaining() +
                               " more bytes, waiting for " + (_padlen1 - _received) + " more bytes");
             } else {
+                Appendtofile.write("Bad msg 1, failing after getting " + src.remaining() + " more bytes" + "\n");
                 fail("Bad msg 1, failing after getting " + src.remaining() + " more bytes");
             }
             return;
@@ -418,6 +438,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
             int toGet = Math.min(src.remaining(), _padlen1 - _received);
             src.get(_X, _received, toGet);
             _received += toGet;
+            Appendtofile.write("_received and _padlen1: " + String.valueOf(_received) + String.valueOf(_padlen1) + "\n");
             if (_received < _padlen1)
                 return;
             changeState(State.IB_NTCP2_GOT_PADDING);
@@ -426,9 +447,11 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 _log.debug("After mixhash padding " + _padlen1 + " msg 1: " + _handshakeState.toString());
             _received = 0;
             if (src.hasRemaining()) {
+                Appendtofile.write("Extra data after msg 1: " + String.valueOf(src.remaining()) + "\n");
                 // Inbound conn can never have extra data after msg 1
                 fail("Extra data after msg 1: " + src.remaining());
             } else {
+                Appendtofile.write("else " + "\n");
                 // write msg 2
                 prepareOutbound2();
             }

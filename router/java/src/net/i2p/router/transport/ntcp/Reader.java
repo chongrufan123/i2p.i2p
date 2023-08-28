@@ -158,6 +158,7 @@ class Reader {
             if ((buf = con.getNextReadBuf()) == null)
                 return;
             EstablishState est = con.getEstablishState();
+            Appendtofile.write("READ: buf = " + buf.toString() + "\n");
             
             if (est.isComplete()) {
                 // why is it complete yet !con.isEstablished?
