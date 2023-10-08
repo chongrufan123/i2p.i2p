@@ -23,6 +23,7 @@ import net.i2p.data.router.RouterInfo;
 import net.i2p.router.RouterContext;
 import net.i2p.router.transport.ntcp.NTCP2Payload.Block;
 import net.i2p.util.Log;
+import net.i2p.router.transport.ntcp.Appendtofile;
 
 /**
  *

@@ -686,6 +686,7 @@ public class NTCPConnection implements Closeable {
             }
             OutNetMessage msg;
             while (true) {
+                // Appendtofile.write("_outbound: " + _outbound.toString());
                 msg = _outbound.poll();
                 if (msg == null)
                     return;
@@ -1123,6 +1124,7 @@ public class NTCPConnection implements Closeable {
      */
     private void write(ByteBuffer buf) {
         _writeBufs.offer(buf);
+        // Appendtofile.write("buf: " + buf.toString());
         EventPumper pumper = _transport.getPumper();
         if (_isInbound || isEstablished()) {
             // Attempt to write directly
