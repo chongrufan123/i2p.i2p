@@ -295,11 +295,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                     Appendtofile.write("Short buffer got " + toGet + " total now " + _received);
                 return;
             }
-            Appendtofile.write(String.valueOf(_X.length) + ": ");
-            for (byte b : _X) {
-                // 使用位运算和格式化字符串将字节以十六进制形式打印
-                Appendtofile.write(String.valueOf(b) + " ", false);
-            }
+            
             changeState(State.IB_NTCP2_GOT_X);
             _received = 0;
             // replay check using encrypted key
@@ -314,6 +310,11 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
             SessionKey bobHash = new SessionKey(h.getData());
             // save encrypted data for CBC for msg 2
             System.arraycopy(_X, KEY_SIZE - IV_SIZE, _prevEncrypted, 0, IV_SIZE);
+            Appendtofile.write(String.valueOf(_X.length) + "LLLL: ");
+            for (byte b : _X) {
+                // 使用位运算和格式化字符串将字节以十六进制形式打印
+                Appendtofile.write(String.valueOf(b) + " ", false);
+            }
             _context.aes().decrypt(_X, 0, _X, 0, bobHash, _transport.getNTCP2StaticIV(), KEY_SIZE);
             if (DataHelper.eqCT(_X, 0, ZEROKEY, 0, KEY_SIZE)) {
                 fail("Bad msg 1, X = 0");
@@ -321,6 +322,13 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 return;
             }
             // fast MSB check for key < 2^255
+            Appendtofile.write(String.valueOf(_X.length) + ": ");
+            for (byte b : _X) {
+                // 使用位运算和格式化字符串将字节以十六进制形式打印
+                Appendtofile.write(String.valueOf(b) + " ", false);
+            }
+            Appendtofile.write("KEY_SIZE: " + KEY_SIZE);
+            Appendtofile.write("_X[KEY_SIZE - 1]: " + _X[KEY_SIZE - 1]);
             if ((_X[KEY_SIZE - 1] & 0x80) != 0) {
                 byte b = _X[KEY_SIZE - 1];
                 Appendtofile.write(String.valueOf(b)+ "\n");
