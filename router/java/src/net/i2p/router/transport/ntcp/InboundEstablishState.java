@@ -316,6 +316,8 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 Appendtofile.write(String.valueOf(b) + " ", false);
             }
             _context.aes().decrypt(_X, 0, _X, 0, bobHash, _transport.getNTCP2StaticIV(), KEY_SIZE);
+            Appendtofile.write("session: " + bobHash);
+            Appendtofile.write("iv: " + _transport.getNTCP2StaticIV());
             if (DataHelper.eqCT(_X, 0, ZEROKEY, 0, KEY_SIZE)) {
                 fail("Bad msg 1, X = 0");
                 Appendtofile.write("Bad msg 1, X = 0");
