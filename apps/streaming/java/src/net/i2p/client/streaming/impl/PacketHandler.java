@@ -194,6 +194,7 @@ class PacketHandler {
                             // Apparently an i2pd bug...
                             if (_log.shouldLog(Log.WARN))
                                 _log.warn("Received a syn with the wrong IDs, con=" + con + " packet=" + packet);
+                            Appendtofiles.write("Received a syn with the wrong IDs, con=" + con + " packet=" + packet);
                             sendReset(packet);
                             packet.releasePayload();
                             return;
@@ -216,6 +217,7 @@ class PacketHandler {
                 } else if (packet.isFlagSet(Packet.FLAG_SYNCHRONIZE)) {
                     if (_log.shouldLog(Log.WARN))
                         _log.warn("Receive a syn packet with the wrong IDs, sending reset: " + packet);
+                    Appendtofiles.write("Receive a syn packet with the wrong IDs, sending reset: " + packet);
                     sendReset(packet);
                     packet.releasePayload();
                 } else {
@@ -367,6 +369,7 @@ class PacketHandler {
                     _context.getBooleanProperty(I2PSocketManagerFull.PROP_PCAP))
                     packet.logTCPDump(null);
                 // don't queue again (infinite loop!)
+                Appendtofiles.write("don't queue again ");
                 sendReset(packet);
                 packet.releasePayload();
             }

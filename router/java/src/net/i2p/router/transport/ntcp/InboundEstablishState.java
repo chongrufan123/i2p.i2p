@@ -112,9 +112,6 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
     @Override
     public synchronized void receive(ByteBuffer src) {
         super.receive(src);
-        Appendtofile.write("src_limit: " + String.valueOf(src.limit()));
-        Appendtofile.write("src_pos: " + String.valueOf(src.position()));
-        Appendtofile.write("receive: " + src.toString());
         if (!src.hasRemaining())
             return; // nothing to receive
         receiveInbound(src);
@@ -147,8 +144,7 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
         }
         if (_state == State.IB_INIT && src.hasRemaining()) {
             int remaining = src.remaining();
-            Appendtofile.write("has:remaining " + String.valueOf(remaining));
-            Appendtofile.write("has:_received " + String.valueOf(_received));
+
 
                 if (remaining + _received < MSG1_SIZE) {
                     // Less than 64 total received, so we defer the NTCP 1 or 2 decision.
@@ -310,14 +306,9 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
             SessionKey bobHash = new SessionKey(h.getData());
             // save encrypted data for CBC for msg 2
             System.arraycopy(_X, KEY_SIZE - IV_SIZE, _prevEncrypted, 0, IV_SIZE);
-            Appendtofile.write(String.valueOf(_X.length) + "LLLL: ");
-            for (byte b : _X) {
-                // 使用位运算和格式化字符串将字节以十六进制形式打印
-                Appendtofile.write(String.valueOf(b) + " ", false);
-            }
+
             _context.aes().decrypt(_X, 0, _X, 0, bobHash, _transport.getNTCP2StaticIV(), KEY_SIZE);
-            Appendtofile.write("session: " + bobHash);
-            Appendtofile.write("iv: " + _transport.getNTCP2StaticIV());
+
             if (DataHelper.eqCT(_X, 0, ZEROKEY, 0, KEY_SIZE)) {
                 fail("Bad msg 1, X = 0");
                 Appendtofile.write("Bad msg 1, X = 0");

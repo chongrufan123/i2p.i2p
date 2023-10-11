@@ -99,7 +99,9 @@ class ConnectionHandler {
             if (packet.isFlagSet(Packet.FLAG_SYNCHRONIZE)) {
                 if (_log.shouldLog(Log.WARN))
                     _log.warn("Dropping new SYN request, as we're not listening");
+                Appendtofiles.write("Dropping new SYN request, as we're not listening");
                 sendReset(packet);
+                
             } else {
                 if (_log.shouldLog(Log.WARN))
                     _log.warn("Dropping non-SYN packet - not listening");
@@ -121,6 +123,7 @@ class ConnectionHandler {
             if (_log.shouldLog(Log.WARN))
                 _log.warn("Dropping new SYN request, as the queue is full");
             if (packet.isFlagSet(Packet.FLAG_SYNCHRONIZE))
+                Appendtofiles.write("packet is flagset");
                 sendReset(packet);
         }
     }
@@ -154,6 +157,7 @@ class ConnectionHandler {
                     Packet packet = _synQueue.poll(); // fails immediately if empty
                     if (packet == null || packet.getOptionalDelay() == PoisonPacket.POISON_MAX_DELAY_REQUEST)
                         break;
+                    Appendtofiles.write("fail all the ones we had queued up");
                     sendReset(packet);
                 }
                 if (_restartPending)
@@ -306,6 +310,7 @@ class ConnectionHandler {
                     if (_log.shouldLog(Log.WARN))
                         _log.warn("Expired on the SYN queue: " + _synPacket);
                     // timeout - send RST
+                    Appendtofiles.write("timeout");
                     sendReset(_synPacket);
                 } else {
                     // non-syn packet got stranded on the syn queue, send it to the con

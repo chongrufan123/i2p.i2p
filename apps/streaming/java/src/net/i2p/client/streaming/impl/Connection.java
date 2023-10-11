@@ -780,6 +780,8 @@ class Connection {
                 if (_log.shouldLog(Log.WARN))
                     _log.warn("Hard disconnecting and sending reset, remove? " + removeFromConMgr +
                               " on " + toString(), new Exception("cause"));
+                Appendtofiles.write("Hard disconnecting and sending reset, remove? " + removeFromConMgr +
+                              " on " + toString());
                 sendReset();
             } else {
                 if (_log.shouldLog(Log.WARN))
