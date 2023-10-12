@@ -222,6 +222,7 @@ public class NTCPConnection implements Closeable {
         _chan = chan;
         _version = 1;
         _conKey = key;
+        Appendtofile.write("NTCPConnection : " + this.toString());
         _establishState = new InboundEstablishState(ctx, transport, this);
     }
 
@@ -508,12 +509,11 @@ public class NTCPConnection implements Closeable {
      *         only this or null as of 0.9.37
      */
     private synchronized NTCPConnection locked_close(boolean allowRequeue) {
-        Appendtofile.write("locaked_close ");
+        Appendtofile.write("locaked_close" + this.toString());
         if (_chan != null) try { _chan.close(); } catch (IOException ioe) { }
         if (_conKey != null) _conKey.cancel();
         _establishState = EstablishBase.FAILED;
         NTCPConnection old = _transport.removeCon(this);
-        Appendtofile.write("remove con: "+ old.toString());
         _transport.getReader().connectionClosed(this);
         _transport.getWriter().connectionClosed(this);
 
