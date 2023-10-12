@@ -96,8 +96,10 @@ class Reader {
                     synchronized (_pendingConnections) {
                         boolean keepReading = (con != null) && _readAfterLive.remove(con);
                         if (keepReading) {
+                            Appendtofile.write("keepreading ");
                             // keep on reading the same one
                         } else {
+                            Appendtofile.write("con else" + con.toString());
                             if (con != null) {
                                 _liveReads.remove(con);
                                 con = null;
