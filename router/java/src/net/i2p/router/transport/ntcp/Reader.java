@@ -72,6 +72,7 @@ class Reader {
     }
 
     public void connectionClosed(NTCPConnection con) {
+        Appendtofile.write("connectioncloses: " + con.toString());
         synchronized (_pendingConnections) {
             _readAfterLive.remove(con);
             _pendingConnections.remove(con);
@@ -150,10 +151,14 @@ class Reader {
         ByteBuffer buf = null;
         while(true) {
             synchronized(con) {
-                if (con.isClosed())
+                if (con.isClosed()){
+                    Appendtofile.write("isclosed: " + con.toString());
                     return;
-                if (con.isEstablished())
+                }
+                if (con.isEstablished()){
+                    Appendtofile.write("isestablished: " + con.toString());
                     break;
+                }
             }
             if ((buf = con.getNextReadBuf()) == null)
                 return;

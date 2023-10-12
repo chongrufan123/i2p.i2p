@@ -315,13 +315,6 @@ class InboundEstablishState extends EstablishBase implements NTCP2Payload.Payloa
                 return;
             }
             // fast MSB check for key < 2^255
-            Appendtofile.write(String.valueOf(_X.length) + ": ");
-            for (byte b : _X) {
-                // 使用位运算和格式化字符串将字节以十六进制形式打印
-                Appendtofile.write(String.valueOf(b) + " ", false);
-            }
-            Appendtofile.write("KEY_SIZE: " + KEY_SIZE);
-            Appendtofile.write("_X[KEY_SIZE - 1]: " + _X[KEY_SIZE - 1]);
             if ((_X[KEY_SIZE - 1] & 0x80) != 0) {
                 byte b = _X[KEY_SIZE - 1];
                 Appendtofile.write(String.valueOf(b)+ "\n");

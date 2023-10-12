@@ -774,6 +774,7 @@ class EventPumper implements Runnable {
                 if (rem != null && !con.isInbound())
                     _transport.markUnreachable(rem.calculateHash());
             }
+            Appendtofile.write("---NTCP---: " + con.toString());
             con.close();
         } catch (NotYetConnectedException nyce) {
             if (buf != null)
